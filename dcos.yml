@@ -15,6 +15,29 @@
     - name: Collect DC/OS versions
       setup:
 
+    # Some convoluted templating voodoo to create the dcos_master_list
+    - name: "Create 'master_hosts_metadata' list from 'masters' group"
+      # Loop over masters providing item.0 = loop_index and item.1 = hostname
+      with_indexed_items: 
+        - "{{ groups['masters'] | default([]) }}"
+      vars:
+        # Use a template to contain host related metadata
+        master_host_template:
+          host_fqdn: "{{ item.1 }}"
+          # Lookup the IP address from the FQDN in the inventory 'masters' group.
+          host_ip: "{{ lookup('dig', item.1) }}"
+          host_id: "{{ item.0 + 1 }}"
+      set_fact:
+        # Create a list of host metadata
+        master_hosts_metadata: "{{ ( master_hosts_metadata | default([]) ) + [master_host_template] }}"
+
+    - name: "Create lists of master hosts for use in group_vars\\all\\dcos.yml"
+      set_fact:
+            dcos_master_ip_list:   "{{ ( dcos_master_ip_list   | default([]) ) + [item.1.host_ip] }}"
+            dcos_master_fqdn_list: "{{ ( dcos_master_fqdn_list | default([]) ) + [item.1.host_fqdn] }}"
+      with_indexed_items: 
+        - "{{ master_hosts_metadata | default([]) }}"
+
 - name: DC/OS Requirements
   hosts: all
   become: true
