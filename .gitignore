@@ -7,3 +7,4 @@ releases
 **.pyc
 .vscode/
 venv/
+/group_vars/all/dcos.yml
