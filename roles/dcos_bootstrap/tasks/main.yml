@@ -130,6 +130,12 @@
     checksum: "{{ dcos['download_checksum'] | default(omit) }}"
     dest: "{{ download_path }}/{{ install_file }}"
     mode: 0440
+  # File download can sometimes take longer than the ssh connection timeout
+  async: 3600
+  # Number of seconds to wait beween polls
+  poll: 60
+  # If failure encountered, retry 5 times
+  retries: 5
 
 # vvv POST DOWNLOAD / configuration vvv
 
