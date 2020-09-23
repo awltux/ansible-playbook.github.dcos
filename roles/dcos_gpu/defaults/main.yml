@@ -1,4 +1,9 @@
 ---
+
+# Host already setup to use Artifactory repositories.
+# Don't install additional repos
+artifactory_client: false
+
 # see man lspci (-d)
 nvidia_device_query:
   - vendor: "10de"
