@@ -1,6 +1,4 @@
 ---
-bootstrap_port: 8080
-
 # Host already setup to use Artifactory repositories.
 # Don't install additional repos
 artifactory_client: false

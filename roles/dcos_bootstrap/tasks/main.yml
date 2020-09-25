@@ -214,6 +214,10 @@
   args:
     chdir: "{{ download_path }}"
     creates: "{{ download_path }}/genconf/serve/dcos_install.sh"
+  # Install can sometimes take longer than the ssh connection timeout
+  async: 3600
+  # Number of seconds to wait beween polls
+  poll: 60
 
 # vvv GENERATE UPGRADE SCRIPTS vvv
 

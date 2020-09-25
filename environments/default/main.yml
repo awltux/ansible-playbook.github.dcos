@@ -1,0 +1,13 @@
+---
+
+# The default environment deploys the default profile
+profile: default
+
+# The interface used to detect the ip address for Mesos Cluster Network
+# See group_vars\all\dcos.yml:dcos.config.ip_detect_contents
+ip_detect: eth0
+
+# Use the Google DNS servers
+dcos_config_resolvers:
+  - 8.8.4.4
+  - 8.8.8.8

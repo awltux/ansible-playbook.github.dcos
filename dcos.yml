@@ -1,7 +1,37 @@
 ---
+
+- name: Populate group_vars/all/dcos.yml from group_vars/all/dcos.yml.template
+  hosts: bootstraps
+  gather_facts: no
+  vars_files:
+    - "environments/{{ env_name | default('default') }}/main.yml"
+    - "profiles/{{ profile | default('default') }}/main.yml"
+  tasks:
+    - name: "Playbook configuration"
+      debug:
+        msg: 
+          - "env_name = {{ env_name | default('default') }}"
+          - "profile     = {{ profile | default('default') }}"
+          - "ip_detect     = {{ ip_detect }}"
+          
+    - name: Populate local template file if it exists
+      when: template_filename is exists
+      delegate_to: localhost
+      template:
+        src: "{{ template_filename }}"
+        dest: "{{ target_filename }}"
+        variable_start_string: '[%' 
+        variable_end_string:   '%]'
+      vars:
+        target_filename: "group_vars/all/dcos.yml"
+        template_filename: "{{ target_filename }}.template"
+
 - name: Wait for instances to become reachable
   hosts: all
   gather_facts: no
+  vars_files:
+    - "environments/{{ env_name | default('default') }}/main.yml"
+    - "profiles/{{ profile | default('default') }}/main.yml"
   tasks:
     - name: Wait for instances to become reachable
       wait_for_connection:
@@ -10,37 +40,21 @@
         timeout: 120
 
 - name: Collect DC/OS versions
+  gather_facts: yes
   hosts: all
+  vars_files:
+    - "environments/{{ env_name | default('default') }}/main.yml"
+    - "profiles/{{ profile | default('default') }}/main.yml"
   tasks:
     - name: Collect DC/OS versions
       setup:
 
-    # Some convoluted templating voodoo to create the dcos_master_list
-    - name: "Create 'master_hosts_metadata' list from 'masters' group"
-      # Loop over masters providing item.0 = loop_index and item.1 = hostname
-      with_indexed_items: 
-        - "{{ groups['masters'] | default([]) }}"
-      vars:
-        # Use a template to contain host related metadata
-        master_host_template:
-          host_fqdn: "{{ item.1 }}"
-          # Lookup the IP address from the FQDN in the inventory 'masters' group.
-          host_ip: "{{ lookup('dig', item.1) }}"
-          host_id: "{{ item.0 + 1 }}"
-      set_fact:
-        # Create a list of host metadata
-        master_hosts_metadata: "{{ ( master_hosts_metadata | default([]) ) + [master_host_template] }}"
-
-    - name: "Create lists of master hosts for use in group_vars\\all\\dcos.yml"
-      set_fact:
-            dcos_master_ip_list:   "{{ ( dcos_master_ip_list   | default([]) ) + [item.1.host_ip] }}"
-            dcos_master_fqdn_list: "{{ ( dcos_master_fqdn_list | default([]) ) + [item.1.host_fqdn] }}"
-      with_indexed_items: 
-        - "{{ master_hosts_metadata | default([]) }}"
-
 - name: DC/OS Requirements
   hosts: all
   become: true
+  vars_files:
+    - "environments/{{ env_name | default('default') }}/main.yml"
+    - "profiles/{{ profile | default('default') }}/main.yml"
   tasks:
     - include_role:
         name: dcos_requirements
@@ -50,6 +64,9 @@
 - name: "Setup and configure BOOTSTRAP nodes"
   hosts: bootstraps
   become: true
+  vars_files:
+    - "environments/{{ env_name | default('default') }}/main.yml"
+    - "profiles/{{ profile | default('default') }}/main.yml"
   tasks:
     - include_role:
         name: dcos_bootstrap
@@ -58,6 +75,9 @@
   hosts: masters
   serial: 1
   become: true
+  vars_files:
+    - "environments/{{ env_name | default('default') }}/main.yml"
+    - "profiles/{{ profile | default('default') }}/main.yml"
   tasks:
     - include_role:
         name: dcos_master
@@ -65,6 +85,9 @@
 - name: "Setup and configure AGENT nodes"
   hosts: agents
   become: true
+  vars_files:
+    - "environments/{{ env_name | default('default') }}/main.yml"
+    - "profiles/{{ profile | default('default') }}/main.yml"
   tasks:
     - include_role:
         name: dcos_agent

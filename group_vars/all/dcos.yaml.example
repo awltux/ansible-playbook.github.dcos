@@ -1,5 +1,6 @@
 ---
 dcos_version: "2.1.1"
+bootstrap_port: 8080
 
 dcos:
   version: "{{ dcos_version }}"
