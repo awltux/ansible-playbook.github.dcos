@@ -13,7 +13,7 @@
           - "env_name = {{ env_name | default('default') }}"
           - "profile     = {{ profile | default('default') }}"
           - "ip_detect     = {{ ip_detect }}"
-          
+
     - name: Populate local template file if it exists
       when: template_filename is exists
       delegate_to: localhost
@@ -25,6 +25,7 @@
       vars:
         target_filename: "group_vars/all/dcos.yml"
         template_filename: "{{ target_filename }}.template"
+    
 
 - name: Wait for instances to become reachable
   hosts: all
@@ -39,12 +40,9 @@
         sleep: 10
         timeout: 120
 
-- name: Collect DC/OS versions
+- name: Collect DC/OS versions used by updates
   gather_facts: yes
-  hosts: all
-  vars_files:
-    - "environments/{{ env_name | default('default') }}/main.yml"
-    - "profiles/{{ profile | default('default') }}/main.yml"
+  hosts: dcos
   tasks:
     - name: Collect DC/OS versions
       setup:
