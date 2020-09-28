@@ -15,10 +15,6 @@
     content: "{{ delegated_psk }}"
   when: dcos.enterprise_dcos and (delegated_psk is defined)
 
-# Installation for fresh nodes
-- import_tasks: dcos_install.yml
-  when: (ansible_local is not defined) or (ansible_local.dcos_master_installation is not defined) or (ansible_local.dcos_master_installation['dcos-image-commit'] is not defined)
-
 # Same version config updates for nodes that are on the same version, but differ in `dcos-config--setup` package version
 - name: "Register latest_dcos_config_setup version from bootstrap"
   shell: |
@@ -41,18 +37,35 @@
   register: latest_dcos_config_setup_is_installed
   changed_when: latest_dcos_config_setup_is_installed.rc != 0
 
-# Upgrades for existing nodes, given the installed version doesnt match `dcos['version']`
-# or the installed 'image_commit' != the one specified for this installation.
-# or if its a config change
-- import_tasks: dcos_upgrade.yml
-  when: >
-    ansible_local is defined 
-    and ansible_local.dcos_master_installation is defined  
-    and (
-      ansible_local.dcos_master_installation['version'] != dcos['version']  
-      or (
-        dcos['image_commit'] is defined  
-        and ansible_local.dcos_master_installation['dcos-image-commit'] != dcos['image_commit']
-      )  
-      or latest_dcos_config_setup_is_installed.rc != 0
-    )
+- name: "Calculate whether to install or update"
+  set_fact:
+    # Check for ansible installation flag
+    doing_install: >
+      (ansible_local is not defined) 
+      or (ansible_local.dcos_master_installation is not defined) 
+      or (ansible_local.dcos_master_installation['dcos-image-commit'] is not defined)
+      
+    # Upgrades for existing nodes, given the installed version doesnt match `dcos['version']`
+    # or the installed 'image_commit' != the one specified for this installation.
+    doing_upgrade: >
+      ansible_local is defined 
+      and ansible_local.dcos_master_installation is defined  
+      and (
+        ansible_local.dcos_master_installation['version'] != dcos['version']  
+        or (
+          dcos['image_commit'] is defined  
+          and ansible_local.dcos_master_installation['dcos-image-commit'] != dcos['image_commit']
+        )  
+        or latest_dcos_config_setup_is_installed.rc != 0
+      )
+
+- name: "Verify upgrade and install arent both set"
+  fail:
+    msg: "Cannot Install and Upgrade on the same run"
+  when:
+    - doing_install
+    - doing_upgrade
+    
+- import_tasks: "dcos_{{ 'upgrade' when doing_upgrade else 'install' }}.yml"
+  when: doing_install or doing_upgrade
+

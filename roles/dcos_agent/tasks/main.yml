@@ -3,10 +3,6 @@
   set_fact:
      dcos_version_specifier: "{{ dcos['image_commit'] | default(dcos['version']) }}"
 
-# Installation for fresh nodes
-- import_tasks: dcos_install.yml
-  when: (ansible_local is not defined) or (ansible_local.dcos_agent_installation is not defined) or (ansible_local.dcos_agent_installation['dcos-image-commit'] is not defined)
-
 # Same version config updates for nodes that are on the same version, but differ in `dcos-config--setup` package version
 - name: "Same version config update? Register latest DC/OS-config--setup version from bootstrap"
   shell: |
@@ -29,9 +25,32 @@
   register: latest_dcos_config_setup_is_installed
   changed_when: latest_dcos_config_setup_is_installed.rc != 0
 
-# Upgrades for existing nodes, given the installed version doesnt match `dcos['version']`
-# or the installed 'image_commit' != the one specified for this installation.
-- import_tasks: dcos_upgrade.yml
+- name: "Calculate whether to install or update"
+  set_fact:
+    # Check for ansible installation flag
+    doing_install: >
+      (ansible_local is not defined) 
+      or (ansible_local.dcos_agent_installation is not defined) 
+      or (ansible_local.dcos_agent_installation['dcos-image-commit'] is not defined)
+    # Upgrades for existing nodes, given the installed version doesnt match `dcos['version']`
+    # or the installed 'image_commit' != the one specified for this installation.
+    doing_upgrade: > 
+      ( 
+        ansible_local is defined 
+        and ansible_local.dcos_agent_installation is defined 
+      ) 
+      and (
+        (ansible_local.dcos_agent_installation['version'] != dcos['version']) 
+        or (dcos['image_commit'] is defined and ansible_local.dcos_agent_installation['dcos-image-commit'] != dcos['image_commit']) 
+        or latest_dcos_config_setup_is_installed.rc != 0 
+      )
+  
+- name: "Verify upgrade and install arent both set"
+  fail:
+    msg: "Cannot Install and Upgrade on the same run"
   when:
-    - ansible_local is defined and ansible_local.dcos_agent_installation is defined
-    - (ansible_local.dcos_agent_installation['version'] != dcos['version']) or (dcos['image_commit'] is defined and ansible_local.dcos_agent_installation['dcos-image-commit'] != dcos['image_commit']) or latest_dcos_config_setup_is_installed.rc != 0
+    - doing_install
+    - doing_upgrade
+    
+- import_tasks: "dcos_{{ 'upgrade' when doing_upgrade else 'install' }}.yml"
+  when: doing_install or doing_upgrade
