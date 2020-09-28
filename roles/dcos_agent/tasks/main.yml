@@ -3,29 +3,16 @@
   set_fact:
      dcos_version_specifier: "{{ dcos['image_commit'] | default(dcos['version']) }}"
 
-- name: "Create custom fact directory"
-  file:
-    path: "/etc/ansible/facts.d"
-    state: "directory"
-
-- name: "Custom DC/OS facts"
-  file:
-    src: "/opt/mesosphere/etc/dcos-version.json"
-    dest: "/etc/ansible/facts.d/dcos_installation.fact"
-    state: link
-    force: yes
-  notify: reload facts
-- meta: flush_handlers
-
 # Installation for fresh nodes
 - import_tasks: dcos_install.yml
-  when: (ansible_local is not defined) or (ansible_local.dcos_installation is not defined) or (ansible_local.dcos_installation['dcos-image-commit'] is not defined)
+  when: (ansible_local is not defined) or (ansible_local.dcos_agent_installation is not defined) or (ansible_local.dcos_agent_installation['dcos-image-commit'] is not defined)
 
 # Same version config updates for nodes that are on the same version, but differ in `dcos-config--setup` package version
 - name: "Same version config update? Register latest DC/OS-config--setup version from bootstrap"
   shell: |
     set -o pipefail
-    curl {{ dcos['config']['bootstrap_url'] }}/{{ dcos_version_specifier }}/genconf/serve/package_lists/$(curl {{ dcos['config']['bootstrap_url'] }}/{{ dcos_version_specifier }}/genconf/serve/cluster-package-list.latest).package_list.json | \
+    cluster_package_list_latest=$(curl {{ dcos['config']['bootstrap_url'] }}/{{ dcos_version_specifier }}/genconf/serve/cluster-package-list.latest) &&\
+    curl {{ dcos['config']['bootstrap_url'] }}/{{ dcos_version_specifier }}/genconf/serve/package_lists/${cluster_package_list_latest}.package_list.json | \
     jq -r '.[] | select(.|test("dcos-config--setup"))' | sed s/dcos-config--//
   args:
     warn: false
@@ -46,5 +33,5 @@
 # or the installed 'image_commit' != the one specified for this installation.
 - import_tasks: dcos_upgrade.yml
   when:
-    - ansible_local is defined and ansible_local.dcos_installation is defined
-    - (ansible_local.dcos_installation['version'] != dcos['version']) or (dcos['image_commit'] is defined and ansible_local.dcos_installation['dcos-image-commit'] != dcos['image_commit']) or latest_dcos_config_setup_is_installed.rc != 0
+    - ansible_local is defined and ansible_local.dcos_agent_installation is defined
+    - (ansible_local.dcos_agent_installation['version'] != dcos['version']) or (dcos['image_commit'] is defined and ansible_local.dcos_agent_installation['dcos-image-commit'] != dcos['image_commit']) or latest_dcos_config_setup_is_installed.rc != 0

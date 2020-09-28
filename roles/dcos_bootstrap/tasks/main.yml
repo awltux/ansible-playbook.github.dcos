@@ -65,10 +65,15 @@
     path: "{{ download_path }}/genconf/serve/*"
     state: absent
   when: "dcos['version'] is version('1.9', '>=')"
+  # Find local ansible facts that indicate previously installed version of master and agent.
+  # Also include version_to_upgrade_from or default to current install version
   loop: >
     {{ groups['dcos'] | default([]) | map('extract',hostvars,'ansible_local')| list |
-     select('defined') | selectattr('dcos_installation', 'defined') |
-     map(attribute='dcos_installation') | map(attribute='version') | list |
+     select('defined') | selectattr('dcos_master_installation', 'defined') |
+     map(attribute='dcos_master_installation') | map(attribute='version') | list |
+     union ( groups['dcos'] | default([]) | map('extract',hostvars,'ansible_local')| list |
+     select('defined') | selectattr('dcos_agent_installation', 'defined') |
+     map(attribute='dcos_agent_installation') | map(attribute='version') | list ) | 
      union([dcos['version_to_upgrade_from'] | default(dcos['version']) ]) | unique }}
 
 - name: Create install directory/genconf
@@ -230,10 +235,15 @@
     chdir: "{{ download_path }}"
     creates: "{{ download_path }}/genconf/serve/upgrade_from_{{ item }}/"
   when: "dcos['version'] is version('1.9', '>=')"
+  # Find local ansible facts that indicate previously installed version of master and agent.
+  # Also include version_to_upgrade_from or default to current install version
   loop: >
     {{ groups['dcos'] | default([]) | map('extract',hostvars,'ansible_local')| list |
-     select('defined') | selectattr('dcos_installation', 'defined') |
-     map(attribute='dcos_installation') | map(attribute='version') | list |
+     select('defined') | selectattr('dcos_master_installation', 'defined') |
+     map(attribute='dcos_master_installation') | map(attribute='version') | list |
+     union ( groups['dcos'] | default([]) | map('extract',hostvars,'ansible_local')| list |
+     select('defined') | selectattr('dcos_agent_installation', 'defined') |
+     map(attribute='dcos_agent_installation') | map(attribute='version') | list ) | 
      union([dcos['version_to_upgrade_from'] | default(dcos['version']) ]) | unique }}
 
 - name: Get upgrade directory hash
@@ -245,10 +255,15 @@
   changed_when: false
   register: upgrade_dir_hash
   when: "dcos['version'] is version('1.9', '>=')"
+  # Find local ansible facts that indicate previously installed version of master and agent.
+  # Also include version_to_upgrade_from or default to current install version
   loop: >
     {{ groups['dcos'] | default([]) | map('extract',hostvars,'ansible_local')| list |
-     select('defined') | selectattr('dcos_installation', 'defined') |
-     map(attribute='dcos_installation') | map(attribute='version') | list |
+     select('defined') | selectattr('dcos_master_installation', 'defined') |
+     map(attribute='dcos_master_installation') | map(attribute='version') | list |
+     union ( groups['dcos'] | default([]) | map('extract',hostvars,'ansible_local')| list |
+     select('defined') | selectattr('dcos_agent_installation', 'defined') |
+     map(attribute='dcos_agent_installation') | map(attribute='version') | list ) | 
      union([dcos['version_to_upgrade_from'] | default(dcos['version']) ]) | unique }}
 
 - name: Create latest/ symlink for upgrade.sh

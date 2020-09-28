@@ -11,7 +11,7 @@
     mode: 0740
 
 - name: "DC/OS Installation"
-  when: (ansible_local is not defined) or (ansible_local.dcos_installation is not defined) or (ansible_local.dcos_installation['dcos-image-commit'] is not defined)
+  when: (ansible_local is not defined) or (ansible_local.dcos_agent_installation is not defined) or (ansible_local.dcos_agent_installation['dcos-image-commit'] is not defined)
   block:
     - name: "Installation: Run DC/OS agent installation"
       shell: "set -o pipefail; bash {{ path_base_tmp }}/{{ dcos_version_specifier }}/dcos_install.sh {{ dcos_legacy_node_type_name }}"
@@ -23,3 +23,18 @@
       command: "systemd-cat -t dcos-install"
       args:
         stdin: "{{ install_shell_result.stdout }}"
+
+- name: "Create custom fact directory"
+  file:
+    path: "/etc/ansible/facts.d"
+    state: "directory"
+
+- name: "Custom DC/OS facts to flag agent installed"
+  file:
+    src: "/opt/mesosphere/etc/dcos-version.json"
+    dest: "/etc/ansible/facts.d/dcos_agent_installation.fact"
+    state: link
+    force: yes
+  notify: reload facts
+- meta: flush_handlers
+

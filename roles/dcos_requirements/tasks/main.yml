@@ -15,18 +15,6 @@
         }}
   changed_when: false
 
-- name: "Disable dcos-exhibitor ntp check on CentOS 7+"
-  when: 
-    - ansible_distribution is match( 'CentOS' ) 
-    - ansible_distribution_major_version is version('7', '>=')
-  copy:
-    content: |
-      # The dcos-exhibitor.service fails to start on CentOS 7
-      # because the /opt/mesosphere/bin/check-time utility uses the missing kernel API adjtimex
-      export ENABLE_CHECK_TIME=false
-    dest: /etc/profile.d/dcos-ntpd-fix.sh
-
-
 - name: "Gather OS specific variables"
   include_vars: "{{ item }}"
   with_first_found:

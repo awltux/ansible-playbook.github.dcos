@@ -11,7 +11,7 @@
     mode: 0740
 
 - name: "DC/OS Installation"
-  when: (ansible_local is not defined) or (ansible_local.dcos_installation is not defined) or (ansible_local.dcos_installation['dcos-image-commit'] is not defined)
+  when: (ansible_local is not defined) or (ansible_local.dcos_master_installation is not defined) or (ansible_local.dcos_master_installation['dcos-image-commit'] is not defined)
   block:
     - name: "Installation: Run DC/OS master installation"
       shell: "set -o pipefail; bash {{ path_base_tmp }}/{{ dcos_version_specifier }}/dcos_install.sh master"
@@ -23,3 +23,29 @@
       command: "systemd-cat -t dcos-install"
       args:
         stdin: "{{ install_shell_result.stdout }}"
+
+# The dcos-exhibitor.service fails to start on CentOS 7
+# because the /opt/mesosphere/bin/check-time utility uses the missing kernel API adjtimex
+- name: Disable check_time for CentOS 7
+  when: 
+    - ansible_distribution is match( 'CentOS' ) 
+    - ansible_distribution_major_version is version('7', '>=')
+  lineinfile:
+    path: /opt/mesosphere/etc/check_time.env
+    regexp: '^ENABLE_CHECK_TIME='
+    line: 'ENABLE_CHECK_TIME=false'
+
+- name: "Create custom fact directory"
+  file:
+    path: "/etc/ansible/facts.d"
+    state: "directory"
+
+- name: "Custom DC/OS facts to flag master installed"
+  file:
+    src: "/opt/mesosphere/etc/dcos-version.json"
+    dest: "/etc/ansible/facts.d/dcos_master_installation.fact"
+    state: link
+    force: yes
+  notify: reload facts
+- meta: flush_handlers
+
