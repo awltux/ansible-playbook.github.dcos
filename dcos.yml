@@ -2,7 +2,7 @@
 
 - name: Populate group_vars/all/dcos.yml from group_vars/all/dcos.yml.template
   hosts: bootstraps
-  gather_facts: no
+  gather_facts: yes
   vars_files:
     - "environments/{{ env_name | default('default') }}/main.yml"
     - "profiles/{{ profile | default('default') }}/main.yml"
