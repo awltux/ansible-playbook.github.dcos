@@ -16,7 +16,7 @@ dcos:
 
   config:
     # This is a direct yaml representation of the DC/OS config.yaml
-    # Please see https://docs.mesosphere.com/1.13/installing/production/advanced-configuration/configuration-reference/
+    # Please see https://docs.mesosphere.com/latest/installing/production/advanced-configuration/configuration-reference/
     # for parameter reference.
     cluster_name: "[% dcos_config_cluster_name | default('examplecluster') %]"
     security: strict
