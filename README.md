@@ -128,6 +128,24 @@ When invoking these roles interactively (for example from the operator's machine
 ansible-playbook -e 'dcos_cluster_name_confirmed=True' dcos.yml
 ```
 
+#### Running Playbook wihtout ssh key
+
+Run a Playbook with specific Environment and implied Profile
+
+```bash
+# Change these
+ssh_username=username
+ssh_password=password
+env_name=dcos
+ansible-playbook \
+      -e 'dcos_cluster_name_confirmed=True' \
+      -e ansible_ssh_user=${ssh_username} \
+      -e ansible_ssh_pass=${ssh_password} \
+      -e ansible_sudo_pass=${ssh_password} \
+      -e env_name=${env_name} \
+      -i environments/${env_name}/inventory.ini \
+      dcos.yml
+
 ## Example playbook
 
 Mesosphere DC/OS is a complex system, spanning multiple nodes to form a full multi-node cluster. There are some constraints in making a playbook use the provided roles:
