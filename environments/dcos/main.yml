@@ -1,0 +1,14 @@
+---
+
+# The default environment deploys the default profile
+profile: default
+
+# VirtualBox uses eth0 for external NAT, eth1 is the Mesos cluster network.
+#ip_detect: eth0
+
+# Copy this profile to use corporate DNS servers e.g.
+#   - if using Artifactory for yum or docker 
+#   - if access to internal systems will required from Mesos.
+dcos_config_resolvers:
+  - 10.105.8.52
+  - 10.105.33.60
