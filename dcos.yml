@@ -26,6 +26,13 @@
         target_filename: "group_vars/all/dcos.yml"
         template_filename: "{{ target_filename }}.template"
     
+    - name: "Check that the {{ target_filename }} exists"
+      when: target_filename is not exists
+      fail:
+        msg: "Looks like you forgot to create: {{ target_filename }}"
+      vars:
+        target_filename: "group_vars/all/dcos.yml"
+      
 
 - name: Wait for instances to become reachable
   hosts: all
