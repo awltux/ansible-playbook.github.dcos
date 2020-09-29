@@ -63,8 +63,8 @@
   fail:
     msg: "Cannot Install and Upgrade on the same run"
   when:
-    - doing_install
-    - doing_upgrade
+    - doing_install |bool
+    - doing_upgrade |bool
     
 - include_tasks: 
     file: "{{ dcos_master_import }}"
