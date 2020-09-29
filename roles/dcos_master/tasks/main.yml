@@ -66,6 +66,6 @@
     - doing_install
     - doing_upgrade
     
-- import_tasks: "dcos_{{ 'upgrade' when doing_upgrade else 'install' }}.yml"
+- import_tasks: "dcos_{{ 'upgrade' if doing_upgrade else 'install' }}.yml"
   when: doing_install or doing_upgrade
 
