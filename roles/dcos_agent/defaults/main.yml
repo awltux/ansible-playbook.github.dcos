@@ -1,2 +1,5 @@
 ---
 path_base_tmp: /tmp/dcos
+
+# For Development: Define this on the command line to force an upgrade if necessary.
+force_upgrade: false

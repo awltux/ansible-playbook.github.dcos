@@ -42,7 +42,8 @@
       and (
         (ansible_local.dcos_agent_installation['version'] != dcos['version']) 
         or (dcos['image_commit'] is defined and ansible_local.dcos_agent_installation['dcos-image-commit'] != dcos['image_commit']) 
-        or latest_dcos_config_setup_is_installed.rc != 0 
+        or latest_dcos_config_setup_is_installed.rc != 0
+        or force_upgrade
       )
   
 - name: "Verify upgrade and install arent both set"
