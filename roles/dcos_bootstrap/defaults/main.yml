@@ -5,7 +5,7 @@ s3_prefix: "ansible-dcos-exhibitor"
 
 customer_key: "00000000-0000-0000-0000-000000000000"
 
-# See declaration in group_vars/all/dcos.yml
+# Populated by roles/dcos-boostrap/tasks/main.yml from group_vars/all/dcos.yml:dcos['config']
 dcos_config: {}
 
 dns_search: None
