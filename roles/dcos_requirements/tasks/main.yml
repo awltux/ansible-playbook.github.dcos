@@ -28,7 +28,7 @@
   changed_when: false
 
 - name: "Remove unused ntp client"
-  when: time_sync_package not is match( item )
+  when: not time_sync_package is match( item )
   yum:
     name: "{{ item }}"
     state: absent
@@ -49,7 +49,7 @@
 - name: "Ensure the ntp client is started"
   service: 
     name: "{{ time_sync_package }}d"
-    enable: true
+    enabled: true
     state: started
 
 - name: "Populate service facts"
