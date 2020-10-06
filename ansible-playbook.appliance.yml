@@ -34,6 +34,11 @@
       vars:
         target_filename: "group_vars/all/dcos.yml"
       
+    - name: "Check if ansible-playbook.centos7-basic has been applied"
+      when: ansible_local['ansible-playbook.centos7-basic'].playbook_build_version | version( '1905.1.0','>=' )
+      fail:
+        msg: "Looks like you forgot to deploy: ansible-playbook.centos7-basic"
+      
 
 - name: Wait for instances to become reachable
   hosts: all
