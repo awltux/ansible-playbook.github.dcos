@@ -4,6 +4,7 @@
   hosts: bootstraps
   gather_facts: yes
   vars_files:
+    - vault/credentials.yml
     - "environments/{{ env_name | default('default') }}/main.yml"
     - "profiles/{{ profile | default('default') }}/main.yml"
   tasks:
@@ -38,6 +39,7 @@
   hosts: all
   gather_facts: no
   vars_files:
+    - vault/credentials.yml
     - "environments/{{ env_name | default('default') }}/main.yml"
     - "profiles/{{ profile | default('default') }}/main.yml"
   tasks:
@@ -50,6 +52,8 @@
 - name: Collect DC/OS versions used by updates
   gather_facts: yes
   hosts: dcos
+  vars_files:
+    - vault/credentials.yml
   tasks:
     - name: Collect DC/OS versions
       setup:
@@ -58,6 +62,7 @@
   hosts: all
   become: true
   vars_files:
+    - vault/credentials.yml
     - "environments/{{ env_name | default('default') }}/main.yml"
     - "profiles/{{ profile | default('default') }}/main.yml"
   tasks:
@@ -70,6 +75,7 @@
   hosts: bootstraps
   become: true
   vars_files:
+    - vault/credentials.yml
     - "environments/{{ env_name | default('default') }}/main.yml"
     - "profiles/{{ profile | default('default') }}/main.yml"
   tasks:
@@ -81,6 +87,7 @@
   serial: 1
   become: true
   vars_files:
+    - vault/credentials.yml
     - "environments/{{ env_name | default('default') }}/main.yml"
     - "profiles/{{ profile | default('default') }}/main.yml"
   tasks:
@@ -91,6 +98,7 @@
   hosts: agents
   become: true
   vars_files:
+    - vault/credentials.yml
     - "environments/{{ env_name | default('default') }}/main.yml"
     - "profiles/{{ profile | default('default') }}/main.yml"
   tasks:
@@ -101,6 +109,7 @@
   hosts: all
   become: true
   vars_files:
+    - vault/credentials.yml
     - "environments/{{ env_name | default('default') }}/main.yml"
     - "profiles/{{ profile | default('default') }}/main.yml"
   tasks:
