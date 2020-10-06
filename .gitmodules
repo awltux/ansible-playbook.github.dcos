@@ -1,0 +1,6 @@
+[submodule "scripts/ansible-playbook.common-scripts"]
+	path = scripts/ansible-playbook.common-scripts
+	url = https://scm-manager.local.tmvse.com/devops/git/ansible-playbook.common-scripts
+[submodule "roles/ansible-role.post-deploy"]
+	path = roles/ansible-role.post-deploy
+	url = https://scm-manager.local.tmvse.com/DevOps/git/ansible-role.post-deploy

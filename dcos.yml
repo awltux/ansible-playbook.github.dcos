@@ -96,3 +96,13 @@
   tasks:
     - include_role:
         name: dcos_agent
+
+- name: Do post deploy
+  hosts: all
+  become: true
+  vars_files:
+    - "environments/{{ env_name | default('default') }}/main.yml"
+    - "profiles/{{ profile | default('default') }}/main.yml"
+  tasks:
+    - include_role:
+        name: ansible-role.post-deploy
