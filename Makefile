@@ -2,6 +2,9 @@
 # List available targets
 # > make [list] 
 
+GIT_VERSION ?= master4cmre
+export GIT_VERSION
+
 # Make arguments need to be exported to make them accessible to included makefile 
 # BUILD_NUMBER is only used by vagrant-upload; should be set by Jenkins but defaults to 0
 # BUILD_NUMBER ?= 0
