@@ -33,7 +33,7 @@ FULL_BUILD ?= false
 export FULL_BUILD
 
 # Build the server profile unless another is specified on the command line.
-profile ?= server
+profile ?= default
 export profile
 
 # Used to identify VMs to destroy in target 'vagrant-destroy-all'
