@@ -1,0 +1,44 @@
+{
+  "localLogin": "devops",
+  "ldapLogin": "devopssa",
+  "ldapRealm": "LOCAL.TMVSE.COM",
+  "vmProvider": "virtualbox",
+  "vmBaseIp": "10.222.223",
+  "natBaseIp": "10.223",
+  "natNetCidrMask": "24",
+  "natNetAddrMask": "255.255.255.0",
+  "nodeGroups": [
+    { 
+      "provisionType": "native",
+      "nodeGroup": "appliance",
+      "osFamily": "linux",
+      "kerberosEnabled": false,
+      "images": [
+        {
+          "description": "Development",
+          "imageName": "github-dcos",
+          "imageVersion": "0"
+        },
+        {
+          "description": "Next Deliverable",
+          "imageName": "github-dcos",
+          "imageVersion": "1905.1"
+        },
+        {
+          "description": "Previous Release",
+          "imageName": "centos7-basic",
+          "imageVersion": "1905.1.2"
+        },
+        {
+          "description": "Public image",
+          "imageName": "centos/7",
+          "imageVersion": "2004.01"
+        }
+      ],
+      "addrStart": 44,
+      "nodeCount": 1,
+      "memory": 2048,
+      "cpu": 2
+    }
+  ]
+}
