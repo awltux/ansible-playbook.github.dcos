@@ -34,15 +34,6 @@
       vars:
         target_filename: "group_vars/all/dcos.yml"
       
-    - name: "Check if ansible-playbook.centos7-basic has been applied"
-      when:
-        - ansible_local['ansible-playbook.centos7-basic'] is defined
-        - ansible_local['ansible-playbook.centos7-basic'].playbook_build_version is defined
-        - ansible_local['ansible-playbook.centos7-basic'].playbook_build_version is version( '1905.1.0','>=' )
-      fail:
-        msg: "Looks like you forgot to deploy: ansible-playbook.centos7-basic"
-
-
 - name: Wait for instances to become reachable
   hosts: all
   gather_facts: no
@@ -56,6 +47,18 @@
         delay: 10
         sleep: 10
         timeout: 120
+
+    - name: "Check if ansible-playbook.centos7-basic has been applied to all target hosts"
+      when:
+        - ansible_local['ansible-playbook.centos7-basic'] is defined
+        - ansible_local['ansible-playbook.centos7-basic'].playbook_build_version is defined
+        - ansible_local['ansible-playbook.centos7-basic'].playbook_build_version is version( '1905.1.0','>=' )
+      fail:
+        msg: "Looks like you forgot to deploy: ansible-playbook.centos7-basic"
+
+    - name: "Report installed version of ansible-playbook.centos7-basic"
+      debug:
+        msg: "ansible-playbook.centos7-basic.playbook_build_version = '{{ ansible_local['ansible-playbook.centos7-basic'].playbook_build_version }}'"
 
 - name: Collect DC/OS versions used by updates
   gather_facts: yes
