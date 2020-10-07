@@ -4,3 +4,6 @@
 [submodule "roles/ansible-role.post-deploy"]
 	path = roles/ansible-role.post-deploy
 	url = https://scm-manager.local.tmvse.com/DevOps/git/ansible-role.post-deploy
+[submodule "roles/ansible-role.mesos-agent-attributes"]
+	path = roles/ansible-role.mesos-agent-attributes
+	url = https://scm-manager.local.tmvse.com/DevOps/git/ansible-role.mesos-agent-attributes

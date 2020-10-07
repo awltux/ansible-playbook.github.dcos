@@ -72,8 +72,6 @@
       debug:
         msg: "ansible-playbook.centos7-basic.playbook_build_version = '{{ ansible_local['ansible-playbook.centos7-basic'].playbook_build_version }}'"
 
-
-
 - name: DC/OS Requirements
   hosts: all
   become: true
@@ -121,8 +119,8 @@
     - include_role:
         name: dcos_agent
 
-- name: Do post deploy
-  hosts: all
+- name: Run post-deploy tasks
+  hosts: dcos
   become: true
   vars_files:
     - vault/credentials.yml
@@ -131,3 +129,11 @@
   tasks:
     - include_role:
         name: ansible-role.post-deploy
+
+- name: "Use ansible_local data from ansible-role.post-deploy to configure Agent nodes"
+  hosts: agents
+  become: true
+  tasks:
+    - include_role:
+        name: ansible-role.mesos-agent-attributes
+
