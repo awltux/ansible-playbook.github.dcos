@@ -133,6 +133,8 @@
 - name: "Use ansible_local data from ansible-role.post-deploy to configure Agent nodes"
   hosts: agents
   become: true
+  vars_files:
+    - vault/credentials.yml
   tasks:
     - include_role:
         name: ansible-role.mesos-agent-attributes
