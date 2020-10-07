@@ -48,26 +48,31 @@
         sleep: 10
         timeout: 120
 
-    - name: "Check if ansible-playbook.centos7-basic has been applied to all target hosts"
-      when:
-        - ansible_local['ansible-playbook.centos7-basic'] is defined
-        - ansible_local['ansible-playbook.centos7-basic'].playbook_build_version is defined
-        - ansible_local['ansible-playbook.centos7-basic'].playbook_build_version is version( '1905.1.0','>=' )
-      fail:
-        msg: "Looks like you forgot to deploy: ansible-playbook.centos7-basic"
-
-    - name: "Report installed version of ansible-playbook.centos7-basic"
-      debug:
-        msg: "ansible-playbook.centos7-basic.playbook_build_version = '{{ ansible_local['ansible-playbook.centos7-basic'].playbook_build_version }}'"
-
 - name: Collect DC/OS versions used by updates
   gather_facts: yes
   hosts: dcos
   vars_files:
     - vault/credentials.yml
   tasks:
-    - name: Collect DC/OS versions
+    - name: Gather facts and populate ansible_local
       setup:
+
+    - name: "Check if ansible-playbook.centos7-basic has been applied to all target hosts"
+      when: >
+        not ansible_local['ansible-playbook.centos7-basic'] is defined
+        or not ansible_local['ansible-playbook.centos7-basic'].playbook_build_version is defined
+        or not ansible_local['ansible-playbook.centos7-basic'].playbook_build_version is version( playbook_build_version, playbook_build_operator )
+      fail:
+        msg: "Looks like you forgot to deploy: ansible-playbook.centos7-basic {{ playbook_build_operator }} {{ playbook_build_version }}"
+      vars:
+        playbook_build_version: '1905.1.0'
+        playbook_build_operator: '>='
+
+    - name: "Report installed version of ansible-playbook.centos7-basic"
+      debug:
+        msg: "ansible-playbook.centos7-basic.playbook_build_version = '{{ ansible_local['ansible-playbook.centos7-basic'].playbook_build_version }}'"
+
+
 
 - name: DC/OS Requirements
   hosts: all
