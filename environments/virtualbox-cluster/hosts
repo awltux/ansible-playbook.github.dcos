@@ -1,16 +1,16 @@
 [bootstraps]
-centos7-basic-provisioner-121.LOCAL.TMVSE.COM inventory_ip=10.222.223.121
+github-dcos-provisioner-141.LOCAL.TMVSE.COM inventory_ip=10.222.223.141
 
 [masters]
-centos7-basic-21.LOCAL.TMVSE.COM inventory_ip=10.222.223.21
-centos7-basic-22.LOCAL.TMVSE.COM inventory_ip=10.222.223.22
-centos7-basic-23.LOCAL.TMVSE.COM inventory_ip=10.222.223.23
+github-dcos-41.LOCAL.TMVSE.COM inventory_ip=10.222.223.41
+github-dcos-42.LOCAL.TMVSE.COM inventory_ip=10.222.223.42
+github-dcos-43.LOCAL.TMVSE.COM inventory_ip=10.222.223.43
 
 [agents_private]
-centos7-basic-24.LOCAL.TMVSE.COM inventory_ip=10.222.223.24
+github-dcos-44.LOCAL.TMVSE.COM inventory_ip=10.222.223.44
 
 [agents_public]
-centos7-basic-25.LOCAL.TMVSE.COM inventory_ip=10.222.223.25
+github-dcos-45.LOCAL.TMVSE.COM inventory_ip=10.222.223.45
 
 [bootstraps:vars]
 node_type=bootstrap

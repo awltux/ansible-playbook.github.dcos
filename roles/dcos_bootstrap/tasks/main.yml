@@ -276,7 +276,7 @@
 
 # vvv serve files via http vvv
 
-- name: Serve bootstrap files via dockerized httpd
+- name: Serve bootstrap files via dockerized nginx
   docker_container:
     name: bootstrapnginx
     image: nginx

@@ -1,4 +1,7 @@
 ---
+# Defining DC/OS by using 'version' or, more specifically, 'image_commit'
+dcos_version_specifier: "{{ dcos['image_commit'] | default(dcos['version']) }}"
+
 path_base_tmp: /tmp/dcos
 
 # For Development: Define this on the command line to force an upgrade if necessary.

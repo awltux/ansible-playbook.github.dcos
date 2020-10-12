@@ -1,6 +1,9 @@
 ---
+
 dcos_version: "2.1.1"
 bootstrap_port: 8080
+dcos_config_enable_windows_agents: true
+
 {# If second interface used for for cluster network(e.g. VirtualBox), declare inventory_ip in inventory to hard code ip addresses. #}
 dcos_bootstrap_ip: "[% hostvars[groups['bootstraps'][0]].inventory_ip if hostvars[groups['bootstraps'][0]].inventory_ip is defined else hostvars[groups['bootstraps'][0]].ansible_facts.default_ipv4.address %]"
 
@@ -12,9 +15,10 @@ dcos:
   enterprise_dcos: false
 
   # permissive | enforcing
-  selinux_mode: permissive
+  selinux_mode: "[% dcos_config_selinux_mode | default('permissive') %]"
 
   config:
+    enable_windows_agents: "{{ dcos_config_enable_windows_agents | default(false) }}"
     # This is a direct yaml representation of the DC/OS config.yaml
     # Please see https://docs.mesosphere.com/latest/installing/production/advanced-configuration/configuration-reference/
     # for parameter reference.
@@ -36,6 +40,7 @@ dcos:
       set -o nounset -o errexit
       ip addr show dev [% ip_detect %] primary | awk '/(inet .*\/)/ { print $2 }' | cut -d'/' -f1
 
+    # Corporate DNS hosts should go here
     resolvers: 
     {% for resolver in dcos_config_resolvers %}
       - [% resolver %]

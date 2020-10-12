@@ -1,0 +1,17 @@
+---
+
+- name: "Ensure the target directory exists: /usr/local/bin"
+  file:
+    state: directory
+    path: "{{ dcos_cli_bin_path }}"
+
+- name: "Download DC/OS CLI"
+  get_url:
+    url: https://downloads.dcos.io/cli/releases/binaries/dcos/linux/x86-64/latest/dcos
+    dest: "{{ dcos_cli_bin_path }}"
+    mode: '0770'
+
+# - name: Initialise the dcos command
+
+
+# - name: "Create a DC/OS local devops user"

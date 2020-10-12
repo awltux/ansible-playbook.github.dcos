@@ -119,6 +119,17 @@
     - include_role:
         name: dcos_agent
 
+- name: "Setup and configure BOOTSTRAP nodes"
+  hosts: bootstraps
+  become: true
+  vars_files:
+    - vault/credentials.yml
+    - "environments/{{ env_name | default('default') }}/main.yml"
+    - "profiles/{{ profile | default('default') }}/main.yml"
+  tasks:
+    - include_role:
+        name: dcos_setup
+
 - name: Run post-deploy tasks
   hosts: dcos
   become: true

@@ -15,7 +15,7 @@
       "kerberosEnabled": false,
       "images": [
         {
-          "description": "Development",
+          "description": "Local Development",
           "imageName": "github-dcos",
           "imageVersion": "0"
         },
@@ -23,6 +23,11 @@
           "description": "Next Deliverable",
           "imageName": "github-dcos",
           "imageVersion": "1905.1"
+        },
+        {
+          "description": "Local Development",
+          "imageName": "centos7-basic",
+          "imageVersion": "0"
         },
         {
           "description": "Previous Release",
@@ -35,7 +40,44 @@
           "imageVersion": "2004.01"
         }
       ],
-      "addrStart": 44,
+      "addrStart": 41,
+      "nodeCount": 5,
+      "memory": 2048,
+      "cpu": 2
+    },
+    { 
+      "provisionType": "native",
+      "nodeGroup": "provisioner",
+      "osFamily": "linux",
+      "kerberosEnabled": false,
+      "images": [
+        {
+          "description": "Local Development",
+          "imageName": "github-dcos-provisioner",
+          "imageVersion": "0"
+        },
+        {
+          "description": "Next Deliverable",
+          "imageName": "github-dcos-provisioner",
+          "imageVersion": "1905.1"
+        },
+        {
+          "description": "Local Development",
+          "imageName": "centos7-basic-provisioner",
+          "imageVersion": "0"
+        },
+        {
+          "description": "Previous Release",
+          "imageName": "centos7-basic-provisioner",
+          "imageVersion": "1905.1.2"
+        },
+        {
+          "description": "Public image",
+          "imageName": "centos/7",
+          "imageVersion": "2004.01"
+        }
+      ],
+      "addrStart": 141,
       "nodeCount": 1,
       "memory": 2048,
       "cpu": 2

@@ -1,8 +1,4 @@
 ---
-- name: Defining DC/OS by using 'version' or, more specifically, 'image_commit'
-  set_fact:
-     dcos_version_specifier: "{{ dcos['image_commit'] | default(dcos['version']) }}"
-
 - name: Create /var/lib/dcos
   file:
     path: /var/lib/dcos
@@ -15,49 +11,57 @@
     content: "{{ delegated_psk }}"
   when: dcos.enterprise_dcos and (delegated_psk is defined)
 
-# Same version config updates for nodes that are on the same version, but differ in `dcos-config--setup` package version
-- name: "Register latest_dcos_config_setup version from bootstrap"
-  shell: |
-    set -o pipefail
-    cluster_package_list_latest=$(curl {{ dcos['config']['bootstrap_url'] }}/{{ dcos_version_specifier }}/genconf/serve/cluster-package-list.latest) &&\
-    curl {{ dcos['config']['bootstrap_url'] }}/{{ dcos_version_specifier }}/genconf/serve/package_lists/${cluster_package_list_latest}.package_list.json | \
-    jq -r '.[] | select(.|test("dcos-config--setup"))' | sed s/dcos-config--//
-  args:
-    warn: false
-  register: latest_dcos_config_setup
-  changed_when: false
-
-- name: "Does latest_dcos_config_setup package need installed: {{ latest_dcos_config_setup.stdout }}"
-  shell: |
-    set -o pipefail
-    /opt/mesosphere/bin/dcos-path/dcos-shell pkgpanda list | grep {{ latest_dcos_config_setup.stdout }}
-  args:
-    executable: bash
-  failed_when: false
-  register: latest_dcos_config_setup_is_installed
-  changed_when: latest_dcos_config_setup_is_installed.rc != 0
-
-- name: "Calculate whether to install or update"
+- name: "Calculate whether to install"
   set_fact:
     # Check for ansible installation flag
     doing_install: >
       (ansible_local is not defined) 
       or (ansible_local.dcos_master_installation is not defined) 
       or (ansible_local.dcos_master_installation['dcos-image-commit'] is not defined)
-      
-    # Upgrades for existing nodes, given the installed version doesnt match `dcos['version']`
-    # or the installed 'image_commit' != the one specified for this installation.
-    doing_upgrade: >
-      ansible_local is defined 
-      and ansible_local.dcos_master_installation is defined  
-      and (
-        ansible_local.dcos_master_installation['version'] != dcos['version']  
-        or (
-          dcos['image_commit'] is defined  
-          and ansible_local.dcos_master_installation['dcos-image-commit'] != dcos['image_commit']
-        )  
-        or latest_dcos_config_setup_is_installed.rc != 0
-      )
+    doing_upgrade: false
+
+- name: If not installing, perhaps an update is required.
+  when: 
+    - not doing_install
+  block:
+
+    # Same version config updates for nodes that are on the same version, but differ in `dcos-config--setup` package version
+    - name: "Register latest_dcos_config_setup version from bootstrap"
+      shell: >
+        set -o pipefail
+        cluster_package_list_latest=$(curl {{ dcos['config']['bootstrap_url'] }}/{{ dcos_version_specifier }}/genconf/serve/cluster-package-list.latest) &&\
+        curl {{ dcos['config']['bootstrap_url'] }}/{{ dcos_version_specifier }}/genconf/serve/package_lists/${cluster_package_list_latest}.package_list.json | \
+        jq -r '.[] | select(.|test("dcos-config--setup"))' | sed s/dcos-config--//
+      args:
+        warn: false
+      register: latest_dcos_config_setup
+      changed_when: false
+
+    - name: "Does latest_dcos_config_setup package need installed: {{ latest_dcos_config_setup.stdout }}"
+      shell: >
+        set -o pipefail
+        /opt/mesosphere/bin/dcos-path/dcos-shell pkgpanda list | grep {{ latest_dcos_config_setup.stdout }}
+      args:
+        executable: bash
+      failed_when: false
+      register: latest_dcos_config_setup_is_installed
+      changed_when: latest_dcos_config_setup_is_installed.rc != 0
+
+    - name: "Calculate whether to upgrade"
+      set_fact:
+        # Upgrades for existing nodes, given the installed version doesnt match `dcos['version']`
+        # or the installed 'image_commit' != the one specified for this installation.
+        doing_upgrade: >
+          ansible_local is defined 
+          and ansible_local.dcos_master_installation is defined  
+          and (
+            ansible_local.dcos_master_installation['version'] != dcos['version']  
+            or (
+              dcos['image_commit'] is defined  
+              and ansible_local.dcos_master_installation['dcos-image-commit'] != dcos['image_commit']
+            )  
+            or latest_dcos_config_setup_is_installed.rc != 0
+          )
 
 - name: "Verify upgrade and install arent both set"
   fail:
@@ -68,6 +72,8 @@
     
 - include_tasks: 
     file: "{{ dcos_master_import }}"
-  when: doing_install or doing_upgrade
+  when: >
+    doing_install 
+    or doing_upgrade
   vars:
-    dcos_master_import: "dcos_{{ 'upgrade' if doing_upgrade else 'install' }}.yml"
+    dcos_master_import: "dcos_{{ 'install' if doing_install else 'upgrade' }}.yml"
