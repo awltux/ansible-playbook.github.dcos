@@ -3,6 +3,7 @@
 dcos_version: "2.1.1"
 bootstrap_port: 8080
 dcos_config_enable_windows_agents: true
+dcos_config_enable_ipv6: false
 
 {# If second interface used for for cluster network(e.g. VirtualBox), declare inventory_ip in inventory to hard code ip addresses. #}
 dcos_bootstrap_ip: "[% hostvars[groups['bootstraps'][0]].inventory_ip if hostvars[groups['bootstraps'][0]].inventory_ip is defined else hostvars[groups['bootstraps'][0]].ansible_facts.default_ipv4.address %]"
@@ -18,6 +19,8 @@ dcos:
   selinux_mode: "[% dcos_config_selinux_mode | default('permissive') %]"
 
   config:
+    enable_ipv6: "{{ dcos_config_enable_ipv6 }}"
+    dcos_l4lb_enable_ipv6: "{{ dcos_config_enable_ipv6 }}"
     enable_windows_agents: "{{ dcos_config_enable_windows_agents | default(false) }}"
     # This is a direct yaml representation of the DC/OS config.yaml
     # Please see https://docs.mesosphere.com/latest/installing/production/advanced-configuration/configuration-reference/
