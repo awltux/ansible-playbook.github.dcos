@@ -10,8 +10,44 @@
     url: https://downloads.dcos.io/cli/releases/binaries/dcos/linux/x86-64/latest/dcos
     dest: "{{ dcos_cli_bin_path }}"
     mode: '0770'
+    
+# - name: "Create an internal 'devops' user"
+# This may first require a github login.
+# Perhaps there is a backdoor to creating the first user?
 
-# - name: Initialise the dcos command
+#- name: Initialise the dcos command
+#    command: dcos cluster setup {{ dcos_master_url }}
 
-
-# - name: "Create a DC/OS local devops user"
+# FIXME: Need to create DC/OS devops user first
+#- name: "Install marathon-lb"
+#  # Only run this once
+#  when:
+#    - false
+#    - 'bootstraps' in group_names
+#    - inventory_hostname == bootstraps[0]
+#  block:
+#    - name: "Get an authentication TOKEN"
+#      uri:
+#        url: "{{ acs_api_url }}/auth/login"
+#        method: POST
+#        body:
+#          # This user is a local user that must be created
+#          uid: "{{ ansible_ssh_user }}"
+#          password: "{{ ansible_ssh_pass }}"
+#        body_format: json
+#        status_code: 200
+#        return_content: true
+#      register: dcos_auth_token
+#    
+#    - name: "Deploy Jenkins Master app as Marathon Service"
+#      uri:
+#        url: "{{ marathon_api_url }}/apps"
+#        method: POST
+#        # marathon_lb_deploy_config is defined in the roles/dcos_setup/default/main.yml
+#        body: "{{ marathon_lb_deploy_config | to_json }}"
+#        body_format: json
+#        headers:
+#          Authorization: "token={{ (dcos_auth_token.content | from_json).token }}"
+#        # Good response
+#        status_code: 201
+#

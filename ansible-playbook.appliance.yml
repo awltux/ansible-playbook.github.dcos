@@ -119,8 +119,10 @@
     - include_role:
         name: dcos_agent
 
-- name: "Setup and configure BOOTSTRAP nodes"
-  hosts: bootstraps
+- name: "Setup and configure agent nodes"
+  hosts:
+    - bootstraps
+    - agents
   become: true
   vars_files:
     - vault/credentials.yml
@@ -140,13 +142,3 @@
   tasks:
     - include_role:
         name: ansible-role.post-deploy
-
-- name: "Use ansible_local data from ansible-role.post-deploy to configure Agent nodes"
-  hosts: agents
-  become: true
-  vars_files:
-    - vault/credentials.yml
-  tasks:
-    - include_role:
-        name: ansible-role.mesos-agent-attributes
-

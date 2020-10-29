@@ -64,3 +64,20 @@
   when: doing_install or doing_upgrade
   vars:
     dcos_agent_import: "dcos_{{ 'install' if doing_install else 'upgrade' }}.yml"
+    
+# Write to a local ansible fact variable that will be loaded by subsequent builds
+- name: "Create facts.d file to indicate this is a mesos_agent"
+  copy: 
+    force: false
+    # Combine build facts with ansible_facts
+    content: "{{ item.fact_content }}"
+    dest: "{{ ansible_facts_dir }}/{{ item.fact_name }}.fact"
+  # Mask as this task always changes
+  changed_when: false
+  loop:
+    - fact_name: "mesos_agent"
+      fact_content: "true"
+    - fact_name: "mesos_agent_public"
+      fact_content: "{{ 'true' if node_type == 'agent_public' else 'false' }}"
+      
+
